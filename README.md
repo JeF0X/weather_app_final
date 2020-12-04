@@ -1,3 +1,3 @@
 # weather_app
 
-Base for a weather app.
+Finished weather app exercise.
