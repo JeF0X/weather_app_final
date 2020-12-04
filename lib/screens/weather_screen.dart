@@ -12,6 +12,36 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
+  double temp = 0;
+  String cityName = '';
+  String weatherIcon = '';
+  String userInput = '';
+  Weather weather;
+  WeatherFactory weatherFactory;
+
+  void updateUI() {
+    if (weather == null) {
+      setState(() {
+        temp = 404;
+        cityName = 'Error';
+        weatherIcon = 'E';
+      });
+      return;
+    }
+
+    setState(() {
+      temp = weather.temperature.celsius;
+      cityName = weather.areaName;
+      weatherIcon = WeatherData.getWeatherIcon(weather.weatherConditionCode);
+    });
+  }
+
+  @override
+  void initState() {
+    weatherFactory = WeatherFactory('13f6b010b8fca72f81754571d05c160f');
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +69,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         Row(
                           children: [
                             Text(
-                              'Oulu',
+                              cityName,
                               style: TextStyle(fontSize: 40.0),
                               textAlign: TextAlign.end,
                             ),
@@ -56,14 +86,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             Expanded(
                               flex: 2,
                               child: Text(
-                                '🌨',
+                                weatherIcon,
                                 style: TextStyle(fontSize: 150.0),
                               ),
                             ),
                             Expanded(
                               flex: 1,
                               child: Text(
-                                '-20°C',
+                                '${temp.round()} °C',
                                 style: TextStyle(fontSize: 35.0),
                                 textAlign: TextAlign.end,
                               ),
@@ -85,13 +115,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 await Geolocator.getCurrentPosition(
                                     desiredAccuracy: LocationAccuracy.low);
                             print(position);
-
-                            WeatherFactory weatherFactory = WeatherFactory(
-                                '13f6b010b8fca72f81754571d05c160f');
-                            Weather weather =
+                            weather =
                                 await weatherFactory.currentWeatherByLocation(
                                     position.latitude, position.longitude);
-                            print(weather.temperature.celsius);
+                            updateUI();
                           },
                         ),
                         SizedBox(
@@ -101,6 +128,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           child: TextField(
                             style: TextStyle(color: Colors.black),
                             decoration: kInputFieldDecoration,
+                            onChanged: (inputText) {
+                              userInput = inputText;
+                            },
+                            onSubmitted: (inputText) async {
+                              weather = await weatherFactory
+                                  .currentWeatherByCityName(inputText);
+                              updateUI();
+                            },
                           ),
                         ),
                         SizedBox(
@@ -109,7 +144,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ElevatedIconButton(
                           //Hae säätiedot kirjoitetun paikannimen mukaan
                           icon: Icons.search,
-                          onPressed: () {},
+                          onPressed: () async {
+                            weather = await weatherFactory
+                                .currentWeatherByCityName(userInput);
+                            updateUI();
+                          },
                         ),
                       ],
                     ),

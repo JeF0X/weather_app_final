@@ -1,9 +1,5 @@
-import 'package:weather/weather.dart';
-
-const apiKey = '13f6b010b8fca72f81754571d05c160f';
-
 class WeatherData {
-  String getWeatherIcon(int condition) {
+  static String getWeatherIcon(int condition) {
     if (condition < 300) {
       return '🌩';
     } else if (condition < 400) {
