@@ -5,6 +5,7 @@ import 'package:weather_app/modules/elevated_icon_button.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather/weather.dart';
 import 'package:weather_app/utilities/weather_data.dart';
+import 'dart:math' as math;
 
 class WeatherScreen extends StatefulWidget {
   @override
@@ -13,11 +14,19 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   double temp = 0;
+  double windSpeed = 35;
+  double windDegree = 0;
+  double humidity = 0;
   String cityName = '';
   String weatherIcon = '';
   String userInput = '';
   Weather weather;
   WeatherFactory weatherFactory;
+  List<Color> windColors = [
+    Color(0xFF00FF00),
+    Color(0xFFFFFF00),
+    Color(0xFFFF0000),
+  ];
 
   void updateUI() {
     if (weather == null) {
@@ -33,6 +42,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
       temp = weather.temperature.celsius;
       cityName = weather.areaName;
       weatherIcon = WeatherData.getWeatherIcon(weather.weatherConditionCode);
+      windSpeed = weather.windSpeed;
+      windDegree = weather.windDegree;
+      humidity = weather.humidity;
+      print(windDegree);
     });
   }
 
@@ -67,12 +80,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               cityName,
                               style: TextStyle(fontSize: 40.0),
                               textAlign: TextAlign.end,
                             ),
+                            Text(
+                              '💦${humidity.round()}%',
+                              style: TextStyle(
+                                fontSize: 22.0,
+                              ),
+                              textAlign: TextAlign.end,
+                            )
                           ],
                         ),
                         Row(
@@ -81,7 +102,33 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           children: [
                             Expanded(
                               flex: 1,
-                              child: SizedBox(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Wind',
+                                    style: TextStyle(
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Transform.rotate(
+                                        angle: -windDegree * 180 / math.pi,
+                                        child: Icon(
+                                          Icons.north,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${windSpeed.round()} m/s',
+                                        style: TextStyle(fontSize: 20.0),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                             Expanded(
                               flex: 2,
